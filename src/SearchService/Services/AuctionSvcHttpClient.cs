@@ -21,6 +21,5 @@ public class AuctionSvcHttpClient
 
       return await _httpClient.GetFromJsonAsync<List<Item>>(_config["AuctionServiceUrl"]
       +"/api/auctions?date=" + lastUpdated);
-
   }
 }

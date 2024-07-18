@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using AuctionService;
 using AuctionService.Data;
 using MassTransit;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -41,6 +42,13 @@ builder.Services.AddMassTransit(x =>
         cfg.ConfigureEndpoints(context);
     });
 });
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options => {
+        options.Authority = builder.Configuration["IdentityServiceUrl"];
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters.ValidateAudience = false;
+        options.TokenValidationParameters.NameClaimType = "username";
+    });
 // builder.Services.AddHttpsRedirection(options =>
 // {
 //     options.HttpsPort = 7001; // Specify the HTTPS port
@@ -49,16 +57,14 @@ builder.Services.AddMassTransit(x =>
 var app = builder.Build();
 
 //Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-    });
-}
-
-app.MapControllers(); // Use top level route registration
+// if (app.Environment.IsDevelopment())
+// {
+//     app.UseSwagger();
+//     app.UseSwaggerUI(c =>
+//     {
+//         c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+//     });
+// }
 
 //app.UseHttpsRedirection();
 
@@ -78,6 +84,9 @@ app.MapControllers(); // Use top level route registration
 // })
 // .WithName("GetWeatherForecast")
 // .WithOpenApi();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 
 try
 {
